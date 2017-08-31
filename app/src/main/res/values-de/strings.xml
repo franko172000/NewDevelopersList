@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Github Lagos Developers</string>
+    <string name="no_connection">Konnte keine Verbindung herstellen. Wiederholen</string>
+    <string name="no_connection_msg">Du bist nicht online!!!!</string>
+    <string name="profile">Profil</string>
+</resources>

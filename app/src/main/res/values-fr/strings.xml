@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Github Lagos Developers</string>
+    <string name="no_connection">N\'a pas pu se connecter. Recommencez</string>
+    <string name="no_connection_msg">Vous n\'êtes pas en ligne!!!!</string>
+    <string name="profile">Profil</string>
+</resources>

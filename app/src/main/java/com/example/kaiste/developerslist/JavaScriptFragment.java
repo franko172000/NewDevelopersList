@@ -10,10 +10,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +29,12 @@ public class JavaScriptFragment extends Fragment implements LoaderManager.Loader
     private DevelopersAdapter mAdapter;
     private View rootView;
     private RelativeLayout relativeLayout;
+    private LinearLayout internetConStatusContainer;
+    private View footer = null;
+    private LoaderManager  loaderManager;
+    private ListView devView;
+    private int mPage = 1;
+    private String conMsg ;
 
     public JavaScriptFragment() {
         // Required empty public constructor
@@ -44,24 +53,37 @@ public class JavaScriptFragment extends Fragment implements LoaderManager.Loader
         //get url
         String GITHUB_URL = DevelopersUtil.getJsonUrl("javascript",1);
 
-        relativeLayout = (RelativeLayout) rootView.findViewById(R.id.statusParent);
+        if(AppStatus.getInstance(getContext()).isOnline()){
+            DevelopersUtil.ControlNoInternetMsg(rootView,"hide");
+            if(mPage == 1){
 
-        relativeLayout.setVisibility(View.VISIBLE);
+                relativeLayout.setVisibility(View.VISIBLE);
 
-        DevelopersUtil.ControlProgressBar(rootView,"show");
+                DevelopersUtil.ControlProgressBar(rootView,"show");
+            }
+        }else{
+            Toast.makeText(getContext(),conMsg,Toast.LENGTH_SHORT).show();
+            relativeLayout.setVisibility(View.VISIBLE);
+            DevelopersUtil.ControlNoInternetMsg(rootView,"show");
+            DevelopersUtil.ControlProgressBar(rootView,"hide");
+        }
 
         return new JavascriptLoader(getContext(),GITHUB_URL);
     }
 
     @Override
     public void onLoadFinished(Loader<List<DeveloperObj>> loader, List<DeveloperObj> data) {
-        mAdapter.clear();
+        //mAdapter.clear();
         if(data != null && !data.isEmpty()){
             mAdapter.addAll(data);
-
+            if(footer != null){
+                //devView.removeFooterView(footer);
+                footer.setVisibility(View.GONE);
+                mAdapter.notifyDataSetChanged();
+            }
             relativeLayout.setVisibility(View.GONE);
         }
-        // DevelopersUtil.ControlProgressBar(rootView,"hide");
+        DevelopersUtil.ControlProgressBar(rootView,"hide");
         Log.v(LOG_TAG,""+data);
     }
 
@@ -73,22 +95,33 @@ public class JavaScriptFragment extends Fragment implements LoaderManager.Loader
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.activity_javascript,container,false);
-        //get the list of states from the text file
-        //ArrayList<DeveloperObj> developerList = DevelopersUtil.getStates(getContext());
-        //populate the adapter
-        // DevelopersAdapter developersAdapter = new DevelopersAdapter(getActivity(),developerList);
-        //remove the preloader
-        // DevelopersUtil.ControlProgressBar(rootView,"hide");
 
-        LoaderManager loaderManager = getLoaderManager();
-
-        loaderManager.initLoader(3,null,this);
+        conMsg = getResources().getString(R.string.no_connection_msg);
+        //create loader manager
+        loaderManager = getLoaderManager();
+        //layout for the app status indicator
+        relativeLayout = (RelativeLayout) rootView.findViewById(R.id.statusParent);
+        //internet connection layout
+        internetConStatusContainer = (LinearLayout) rootView.findViewById(R.id.internetContainer);
+        //check if internet is active
+        if(AppStatus.getInstance(getContext()).isOnline()){
+            DevelopersUtil.ControlNoInternetMsg(rootView,"hide");
+            loaderManager.initLoader(1,null,this);
+        }else{
+            Toast.makeText(getContext(),conMsg,Toast.LENGTH_SHORT).show();
+            relativeLayout.setVisibility(View.VISIBLE);
+            DevelopersUtil.ControlNoInternetMsg(rootView,"show");
+            DevelopersUtil.ControlProgressBar(rootView,"hide");
+        }
+        //loaderManager.getLoader(1).onContentChanged();
 
         mAdapter = new DevelopersAdapter(getContext(),new ArrayList<DeveloperObj>());
 
-        ListView devView = (ListView) rootView.findViewById(R.id.javascriptListItem);
+        final ListView devView = (ListView) rootView.findViewById(R.id.javascriptListItem);
 
         devView.setAdapter(mAdapter);
+
+        footer = LayoutInflater.from(getContext()).inflate(R.layout.footer_loader,null);
 
         //set onclick listener for the clicked list item
         devView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
@@ -102,12 +135,35 @@ public class JavaScriptFragment extends Fragment implements LoaderManager.Loader
                 Intent intent = new Intent(getContext(),ProfileActivity.class);
                 //pass the selected developer's url to the profile page
                 intent.putExtra("pageUrl",pageUrl);
+                mPage = 1;
                 //start the profile activity
                 startActivity(intent);
             }
         });
+        devView.setOnScrollListener(new AbsListView.OnScrollListener(){
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if(scrollState ==AbsListView.OnScrollListener.SCROLL_STATE_IDLE && (devView.getLastVisiblePosition() - devView.getHeaderViewsCount()) >= mAdapter.getCount() - 1){
+                    footer.setVisibility(View.VISIBLE);
+                    devView.addFooterView(footer,null,false);
+                    mPage++;
+                    DevelopersUtil.setmPage(mPage);
+                    //loaderManager.getLoader(1).onContentChanged();
+                    loaderManager.restartLoader(1,null,JavaScriptFragment.this);
+                }
+            }
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 
+            }
+        });
+        //retry loading again
+        internetConStatusContainer.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                loaderManager.restartLoader(1,null,JavaScriptFragment.this);
+            }
+        });
         return rootView;
     }
-
 }

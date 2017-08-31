@@ -22,7 +22,6 @@
         </activity>
         <activity android:name=".JavaActivity" />
         <activity android:name=".PhpActivity" />
-        <activity android:name=".PythonActivity" />
         <activity android:name=".JavascriptActivity" />
         <activity
             android:label="@string/profile"

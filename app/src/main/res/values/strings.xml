@@ -5,4 +5,5 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="no_connection">Could not connect. Retry </string>
+    <string name="no_connection_msg">You are not online!!!!</string>
 </resources>

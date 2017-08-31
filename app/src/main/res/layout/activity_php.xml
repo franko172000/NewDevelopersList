@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     </ListView>
+    <include layout="@layout/footer_loader"/>
     <include layout="@layout/progress_indicator"/>
 
 </RelativeLayout>

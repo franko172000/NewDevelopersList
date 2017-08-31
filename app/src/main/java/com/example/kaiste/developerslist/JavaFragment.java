@@ -34,6 +34,8 @@ public class JavaFragment extends Fragment implements LoaderManager.LoaderCallba
     private LoaderManager  loaderManager;
     private ListView devView;
     private int mPage = 1;
+    private String conMsg ;
+
 
 
     /**
@@ -59,7 +61,7 @@ public class JavaFragment extends Fragment implements LoaderManager.LoaderCallba
                 DevelopersUtil.ControlProgressBar(rootView,"show");
             }
         }else{
-            Toast.makeText(getContext(),"You are not online!!!!",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(),conMsg,Toast.LENGTH_SHORT).show();
             relativeLayout.setVisibility(View.VISIBLE);
             DevelopersUtil.ControlNoInternetMsg(rootView,"show");
             DevelopersUtil.ControlProgressBar(rootView,"hide");
@@ -80,7 +82,7 @@ public class JavaFragment extends Fragment implements LoaderManager.LoaderCallba
             }
             relativeLayout.setVisibility(View.GONE);
         }
-       DevelopersUtil.ControlProgressBar(rootView,"hide");
+        DevelopersUtil.ControlProgressBar(rootView,"hide");
         Log.v(LOG_TAG,""+data);
     }
 
@@ -92,6 +94,7 @@ public class JavaFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.activity_java,container,false);
+        conMsg = getResources().getString(R.string.no_connection_msg);
         //create loader manager
         loaderManager = getLoaderManager();
         //layout for the app status indicator
@@ -103,56 +106,57 @@ public class JavaFragment extends Fragment implements LoaderManager.LoaderCallba
             DevelopersUtil.ControlNoInternetMsg(rootView,"hide");
             loaderManager.initLoader(1,null,this);
         }else{
-            Toast.makeText(getContext(),"You are not online!!!!",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(),conMsg,Toast.LENGTH_SHORT).show();
             relativeLayout.setVisibility(View.VISIBLE);
             DevelopersUtil.ControlNoInternetMsg(rootView,"show");
             DevelopersUtil.ControlProgressBar(rootView,"hide");
         }
-            //loaderManager.getLoader(1).onContentChanged();
+        //loaderManager.getLoader(1).onContentChanged();
 
-            mAdapter = new DevelopersAdapter(getContext(),new ArrayList<DeveloperObj>());
 
-            final ListView devView = (ListView) rootView.findViewById(R.id.listItem);
 
-            devView.setAdapter(mAdapter);
+        mAdapter = new DevelopersAdapter(getContext(),new ArrayList<DeveloperObj>());
 
-            footer = LayoutInflater.from(getContext()).inflate(R.layout.footer_loader,null);
+        final ListView devView = (ListView) rootView.findViewById(R.id.listItem);
 
-            //set onclick listener for the clicked list item
-            devView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    //find the current dveloper information that was clicked
-                    DeveloperObj developer = mAdapter.getItem(position);
-                    //get the developer's page api url
-                    String pageUrl = developer.getmPageUrl();
-                    //create a new intent
-                    Intent intent = new Intent(getContext(),ProfileActivity.class);
-                    //pass the selected developer's url to the profile page
-                    intent.putExtra("pageUrl",pageUrl);
-                    mPage = 1;
-                    //start the profile activity
-                    startActivity(intent);
+        devView.setAdapter(mAdapter);
+
+        footer = LayoutInflater.from(getContext()).inflate(R.layout.footer_loader,null);
+
+        //set onclick listener for the clicked list item
+        devView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //find the current dveloper information that was clicked
+                DeveloperObj developer = mAdapter.getItem(position);
+                //get the developer's page api url
+                String pageUrl = developer.getmPageUrl();
+                //create a new intent
+                Intent intent = new Intent(getContext(),ProfileActivity.class);
+                //pass the selected developer's url to the profile page
+                intent.putExtra("pageUrl",pageUrl);
+                mPage = 1;
+                //start the profile activity
+                startActivity(intent);
+            }
+        });
+        devView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if(scrollState ==AbsListView.OnScrollListener.SCROLL_STATE_IDLE && (devView.getLastVisiblePosition() - devView.getHeaderViewsCount()) >= mAdapter.getCount() - 1){
+                    footer.setVisibility(View.VISIBLE);
+                    devView.addFooterView(footer,null,false);
+                    mPage++;
+                    DevelopersUtil.setmPage(mPage);
+                    //loaderManager.getLoader(1).onContentChanged();
+                    loaderManager.restartLoader(1,null,JavaFragment.this);
                 }
-            });
-            devView.setOnScrollListener(new AbsListView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(AbsListView view, int scrollState) {
-                    if(scrollState ==AbsListView.OnScrollListener.SCROLL_STATE_IDLE && (devView.getLastVisiblePosition() - devView.getHeaderViewsCount()) >= mAdapter.getCount() - 1){
-                        footer.setVisibility(View.VISIBLE);
-                        devView.addFooterView(footer,null,false);
-                        mPage++;
-                        DevelopersUtil.setmPage(mPage);
-                        //loaderManager.getLoader(1).onContentChanged();
-                        loaderManager.restartLoader(1,null,JavaFragment.this);
-                    }
-                }
-                @Override
-                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            }
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 
-                }
-            });
-
+            }
+        });
         //retry loading again
         internetConStatusContainer.setOnClickListener(new View.OnClickListener() {
             @Override

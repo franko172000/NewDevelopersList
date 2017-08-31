@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="gone"
+    android:id="@+id/statusParent"
+    android:background="@color/icons">
+        <ProgressBar
+            android:id="@+id/progress"
+            android:visibility="gone"
+            android:layout_centerInParent="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_centerInParent="true"
+        android:id="@+id/internetContainer"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:layout_gravity="center_horizontal">
+            <ImageView
+                android:id="@+id/internetIcon"
+                android:src="@drawable/internet_off"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:tint="@color/accent"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_centerInParent="true"
+            android:layout_width="match_parent"
+            android:textAlignment="center"
+            android:text="@string/no_connection"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+
+</RelativeLayout>

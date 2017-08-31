@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Github Lagos Developers</string>
+    <string name="statesHeader">Developers by State</string>
+    <string name="profile">Profile</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="no_connection">Could not connect. Retry </string>
+</resources>
